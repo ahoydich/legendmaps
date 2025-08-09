@@ -13,6 +13,7 @@ Legend Maps is a web-based, turn-based roguelike dungeon crawler with Web3 integ
 - **Web3**: Ethers v5, SIWE (Sign-In With Ethereum) via RainbowKit adapter, contract ABIs for on-chain reads/writes
 - **Data**: PostgreSQL (Sequelize models)
 - **Infra/Tooling**: TypeScript end-to-end, Sentry hooks, dotenv, nodemon/ts-node
+- **New (Phase 0)**: Docker Compose for local dev (Node 18 images), env examples for backend/frontend
 
 ### Key Features
 - Authoritative server-side game engine: all map generation, turns, combat, and state are computed on the backend.
@@ -34,16 +35,18 @@ Legend Maps is a web-based, turn-based roguelike dungeon crawler with Web3 integ
   - Powerups and token-based operations (LegendCoin)
 
 ### Run/Develop
-- Start backend and frontend separately.
+- Start backend and frontend separately, or via Docker Compose.
 - Default local ports: frontend at 3000, backend at 8000.
 - Frontend configuration: `legendmaps_client_and_site/src/settings.js` maps `APP_ENV` to `API_URL` and `WS_URL`.
 - Backend configuration: `.env` variables (see below) and session/DB setup in `legendmaps_backend/src/index.ts` and `legendmaps_backend/src/db.ts`.
+- Docker Compose: `docker-compose.yml` runs Postgres, backend, frontend. Use `legendmaps_backend/.env` and `legendmaps_client_and_site/.env.local` based on provided `.env.example` files.
 
 ### Environment Variables (non-exhaustive)
 Backend (`legendmaps_backend/.env`):
 - `PORT=8000`
-- DB: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_USER` (legacy), `DB_PASSWORD` (dup), `SSL` implied true
+- DB: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
 - Sessions: `SESSION_SECRET`, `IS_SECURE` ("true" to set SameSite=None; secure cookies)
+- CORS: `ALLOWED_ORIGINS` (comma-separated; defaults to `http://localhost:3000`)
 - Providers: `SERVER_PROVIDER_URL` (Ethereum RPC), `POLYGON_RPC_URL` (for token/powerups)
 - Contracts: `TOKEN_CONTRACT_ADDRESS`, `POWERUP_CONTRACT_ADDRESS`, `TOKEN_CONTRACT_CHAIN_ID`, `CONTRACT_PRIVATE_KEY`
 - SIWE/debug: `DEBUGGING_GAME`, `GAME_DEBUG_ADDRESS`
@@ -74,7 +77,7 @@ Frontend (`legendmaps_client_and_site` env):
   - `src/util/api/GameApi.ts`: REST calls for game lifecycle
   - `src/settings.js`: all runtime URLs and contract addresses
 - Backend
-  - `src/index.ts`: Express app, sessions, CORS, WebSocket server, upgrade handling
+  - `src/index.ts`: Express app, sessions, CORS (now env-driven), WebSocket server, upgrade handling
   - `src/services/*`: REST routes/controllers (`auth`, `users`, `game`, `maps`, `adventurers`)
   - `src/game_engine/*`: core game logic, turn processing, serialization, command processing
   - `src/utils/contractUtils.ts`: contract helpers and addresses

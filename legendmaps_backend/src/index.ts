@@ -41,11 +41,7 @@ Sentry.init({
     dsn: "SENTRY_URL_HERE",
 });
 
-export const allowedOrigins = [
-    // Client development origin.
-    "http://localhost:3000",
-    "http://localhost:3000/"
-];
+export const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",").map((o) => o.trim());
 
 const app = express();
 
@@ -98,9 +94,10 @@ app.use(sessionParser);
 app.use(
     cors({
         credentials: true,
-        origin: [
-            "http://localhost:3000",
-        ],
+        origin: (origin, cb) => {
+            if (!origin) return cb(null, true);
+            return allowedOrigins.includes(origin) ? cb(null, true) : cb(new Error("Not allowed by CORS"));
+        },
         methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD", "PATCH"],
     }),
 );
@@ -118,8 +115,6 @@ export const socketMap = new Map();
 export const wss = new WebSocket.Server({ noServer: true });
 
 function heartbeat(ws: WebSocket) {
-    //console.log("heartbeat check");
-    //heartbeat check
     //@ts-ignore
     ws.isAlive = true;
 }
