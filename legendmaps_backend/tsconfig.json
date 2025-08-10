@@ -1,12 +1,20 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2015",
+        "target": "ES2020",
         "declaration": true,
         "outDir": "./dist",
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": false,
+        "skipLibCheck": true,
+        "types": ["node", "jest"],
+        "baseUrl": "./src",
+        "paths": {
+            "../contracts/LMAbis/*": ["../__mocks__/emptyModule.js"]
+        }
     },
     "include": ["src/*"],
     "exclude": ["node_modules", "dist/**/*"]

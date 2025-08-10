@@ -1,0 +1,62 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:14
+    container_name: legendmaps-postgres
+    environment:
+      POSTGRES_USER: legendmaps
+      POSTGRES_PASSWORD: legendmaps
+      POSTGRES_DB: legendmaps
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./legendmaps_backend
+      dockerfile: Dockerfile
+    container_name: legendmaps-backend
+    environment:
+      - PORT=8000
+      - SESSION_SECRET=${SESSION_SECRET:-replace_me}
+      - IS_SECURE=${IS_SECURE:-false}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=legendmaps
+      - DB_USERNAME=legendmaps
+      - DB_PASSWORD=legendmaps
+      - SERVER_PROVIDER_URL=${SERVER_PROVIDER_URL:-https://mainnet.infura.io/v3/${INFURA_ID}}
+      - POLYGON_RPC_URL=${POLYGON_RPC_URL:-https://polygon-mainnet.infura.io/v3/${INFURA_ID}}
+      - TOKEN_CONTRACT_ADDRESS=${TOKEN_CONTRACT_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - POWERUP_CONTRACT_ADDRESS=${POWERUP_CONTRACT_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - TOKEN_CONTRACT_CHAIN_ID=${TOKEN_CONTRACT_CHAIN_ID:-1}
+      - CONTRACT_PRIVATE_KEY=${CONTRACT_PRIVATE_KEY:-}
+      - DEBUGGING_GAME=${DEBUGGING_GAME:-false}
+      - GAME_DEBUG_ADDRESS=${GAME_DEBUG_ADDRESS:-}
+      - INFURA_ID=${INFURA_ID:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./legendmaps_client_and_site
+      dockerfile: Dockerfile
+    container_name: legendmaps-frontend
+    environment:
+      - NEXT_PUBLIC_APP_ENV=local
+      - INFURA_ID=${INFURA_ID:-}
+      - ENV_API_URL=
+      - POLYGON_RPC_URL=${POLYGON_RPC_URL:-https://polygon-mainnet.infura.io/v3/${INFURA_ID}}
+      - TOKEN_CONTRACT_CHAIN_ID=${TOKEN_CONTRACT_CHAIN_ID:-1}
+      - TOKEN_CONTRACT_ADDRESS=${TOKEN_CONTRACT_ADDRESS:-0x0000000000000000000000000000000000000000}
+      - POWERUP_CONTRACT_ADDRESS=${POWERUP_CONTRACT_ADDRESS:-0x0000000000000000000000000000000000000000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

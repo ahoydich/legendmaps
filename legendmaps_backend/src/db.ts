@@ -684,6 +684,8 @@ RewardRequests.init(
 // }
 
 // Create new tables
-sequelize.sync();
+if (process.env.NODE_ENV !== "test") {
+  sequelize.sync();
+}
 
 export { sequelize };
